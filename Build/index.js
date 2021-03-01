@@ -115,7 +115,7 @@ module.exports = {
 
     Queue()
       .enqueue(next => title('清空輸出目錄', cmdColor('執行指令', 'rm -rf ' + Path.relative(Setting.root, Config.dest) + Path.sep + '*'))
-        && Process.exec('rm -rf ' + Config.dest + '*', error => error ? Progress.fail('錯誤', error) : next(done())))
+        && Process.exec('rm -rf ' + Config.dest + '*', error => error ? fail('錯誤', error) : next(done())))
 
       .enqueue(next => title('掃描開發目錄', cmdColor('執行動作', 'scan ' + Path.relative(Setting.root, Config.entry) + Path.sep + '*'))
         && next(scanDir(Config.entry)
@@ -145,7 +145,7 @@ module.exports = {
 
       .enqueue((next, files) => title('建立 .gitignore 檔案', cmdColor('執行動作', 'create .gitignore file'))
         && FileSystem.writeFile(Config.dest + '.gitignore', '*' + "\n", 'utf8', error => error
-          ? Progress.fail(null, '建立 .gitignore 時發生錯誤！', error)
+          ? fail(null, '建立 .gitignore 時發生錯誤！', error)
           : next(files, done())))
 
       .enqueue((next, files) => {
@@ -156,11 +156,11 @@ module.exports = {
 
         files.cssFiles.forEach(file => queue.enqueue(next => verifyDirs(file.dist.base, file.dist.dirs) 
           ? FileSystem.readFile(file.src, 'utf8', (error, data) => error
-            ? Progress.fail('失敗', '無法讀取 ' + Path.relative(Setting.root, file.src), error)
+            ? fail('失敗', '無法讀取 ' + Path.relative(Setting.root, file.src), error)
             : FileSystem.writeFile(file.dist.path, Config.minify ? new Minify().minify(data).styles : data, 'utf8', error => error
-              ? Progress.fail('失敗', '無法寫入 ' + Path.relative(Setting.root, file.dist.path), error)
+              ? fail('失敗', '無法寫入 ' + Path.relative(Setting.root, file.dist.path), error)
               : next(advance)))
-          : Progress.fail('失敗', '無法建立 ' + Path.relative(Setting.root, file.dist.base + file.dist.dirs.join(Path.sep)) + Path.sep + ' 目錄')))
+          : fail('失敗', '無法建立 ' + Path.relative(Setting.root, file.dist.base + file.dist.dirs.join(Path.sep)) + Path.sep + ' 目錄')))
 
         queue.enqueue(_ => next(files, done()))
       })
@@ -173,11 +173,11 @@ module.exports = {
 
         files.jsFiles.forEach(file => queue.enqueue(next => verifyDirs(file.dist.base, file.dist.dirs) 
           ? FileSystem.readFile(file.src, 'utf8', (error, data) => error
-            ? Progress.fail('失敗', '無法讀取 ' + Path.relative(Setting.root, file.src), error)
+            ? fail('失敗', '無法讀取 ' + Path.relative(Setting.root, file.src), error)
             : FileSystem.writeFile(file.dist.path, Config.minify ? Babel.transformSync(data, { presets: Config.jsCover }).code : data, 'utf8', error => error
-              ? Progress.fail('失敗', '無法寫入 ' + Path.relative(Setting.root, file.dist.path), error)
+              ? fail('失敗', '無法寫入 ' + Path.relative(Setting.root, file.dist.path), error)
               : next(advance)))
-          : Progress.fail('失敗', '無法建立 ' + Path.relative(Setting.root, file.dist.base + file.dist.dirs.join(Path.sep)) + Path.sep + ' 目錄')))
+          : fail('失敗', '無法建立 ' + Path.relative(Setting.root, file.dist.base + file.dist.dirs.join(Path.sep)) + Path.sep + ' 目錄')))
 
         queue.enqueue(_ => next(files, done()))
       })
@@ -190,11 +190,11 @@ module.exports = {
 
         files.phpFiles.forEach(file => queue.enqueue(next => verifyDirs(file.dist.base, file.dist.dirs) 
           ? php2html(Config.dest, file.src, Config.php, (error, data) => error
-            ? Progress.fail('失敗', '無法執行 ' + Path.relative(Setting.root, file.src), error)
+            ? fail('失敗', '無法執行 ' + Path.relative(Setting.root, file.src), error)
             : FileSystem.writeFile(file.dist.path, Config.minify ? Minify(data, { collapseWhitespace: true, continueOnParseError: false }) : data, 'utf8', error => error
-              ? Progress.fail('失敗', '無法寫入 ' + Path.relative(Setting.root, file.dist.path), error)
+              ? fail('失敗', '無法寫入 ' + Path.relative(Setting.root, file.dist.path), error)
               : next(advance)))
-          : Progress.fail('失敗', '無法建立 ' + Path.relative(Setting.root, file.dist.base + file.dist.dirs.join(Path.sep)) + Path.sep + ' 目錄')))
+          : fail('失敗', '無法建立 ' + Path.relative(Setting.root, file.dist.base + file.dist.dirs.join(Path.sep)) + Path.sep + ' 目錄')))
 
         queue.enqueue(_ => next(files, done()))
       })
@@ -208,11 +208,11 @@ module.exports = {
 
         files.htmlFiles.forEach(file => queue.enqueue(next => verifyDirs(file.dist.base, file.dist.dirs) 
           ? FileSystem.readFile(file.src, 'utf8', (error, data) => error
-            ? Progress.fail('失敗', '無法讀取 ' + Path.relative(Setting.root, file.src), error)
+            ? fail('失敗', '無法讀取 ' + Path.relative(Setting.root, file.src), error)
             : FileSystem.writeFile(file.dist.path, Config.minify ? Minify(data, { collapseWhitespace: true, continueOnParseError: false }) : data, 'utf8', error => error
-              ? Progress.fail('失敗', '無法寫入 ' + Path.relative(Setting.root, file.dist.path), error)
+              ? fail('失敗', '無法寫入 ' + Path.relative(Setting.root, file.dist.path), error)
               : next(advance)))
-          : Progress.fail('失敗', '無法建立 ' + Path.relative(Setting.root, file.dist.base + file.dist.dirs.join(Path.sep)) + Path.sep + ' 目錄')))
+          : fail('失敗', '無法建立 ' + Path.relative(Setting.root, file.dist.base + file.dist.dirs.join(Path.sep)) + Path.sep + ' 目錄')))
 
         queue.enqueue(_ => next(files, done()))
       })
@@ -225,9 +225,9 @@ module.exports = {
 
         files.otherFiles.forEach(file => queue.enqueue(next => verifyDirs(file.dist.base, file.dist.dirs) 
           ? FileSystem.copyFile(file.src, file.dist.path, error => error
-            ? Progress.fail('失敗', '無法複製 ' + Path.relative(Setting.root, file.src), error)
+            ? fail('失敗', '無法複製 ' + Path.relative(Setting.root, file.src), error)
             : next(advance))
-          : Progress.fail('失敗', '無法建立 ' + Path.relative(Setting.root, file.dist.base + file.dist.dirs.join(Path.sep)) + Path.sep + ' 目錄')))
+          : fail('失敗', '無法建立 ' + Path.relative(Setting.root, file.dist.base + file.dist.dirs.join(Path.sep)) + Path.sep + ' 目錄')))
 
         queue.enqueue(_ => closure(Config, done()))
       })
