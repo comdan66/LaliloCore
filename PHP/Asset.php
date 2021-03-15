@@ -72,10 +72,10 @@ namespace HTML {
               return !is_string($path)
                 ? is_array($path)
                   ? implode("\n", array_map(function($src, $file) {
-                      return \HTML\Link()->type('text/css')->rel('stylesheet')->href($src . '?v=' . md5_file($file));
+                      return \HTML\link()->type('text/css')->rel('stylesheet')->href($src . '?v=' . md5_file($file));
                     }, array_keys($path), array_values($path)))
                   : null
-                : \HTML\Link()->type('text/css')->rel('stylesheet')->href($path); },
+                : \HTML\link()->type('text/css')->rel('stylesheet')->href($path); },
             self::merge($this->cssPaths))));
 
         $js = array_values(
@@ -84,10 +84,10 @@ namespace HTML {
               return !is_string($path)
                 ? is_array($path)
                   ? implode("\n", array_map(function($src, $file) {
-                      return \HTML\Script()->type('text/javascript')->language('javascript')->src($src . '?v=' . md5_file($file));
+                      return \HTML\script()->type('text/javascript')->language('javascript')->src($src . '?v=' . md5_file($file));
                     }, array_keys($path), array_values($path)))
                   : null
-                : \HTML\Script()->type('text/javascript')->language('javascript')->src($path);
+                : \HTML\script()->type('text/javascript')->language('javascript')->src($path);
             },
             self::merge($this->jsPaths))));
         
@@ -105,14 +105,14 @@ namespace HTML {
             array_map(function($path) {
               return !is_string($path)
                 ? is_array($path)
-                  ? \HTML\Style(...array_map(function($src, $file) {
+                  ? \HTML\style(...array_map(function($src, $file) {
                       return preg_replace("/^" . pack('H*','EFBBBF') . "/", '',
                             preg_replace("/url\(\'?\.\.\/icon\//", "url(" . URL_ICON,
                               fileRead($file)));
                     }, array_keys($path), array_values($path))
                   )->type('text/css')
                   : null
-                : \HTML\Link()->type('text/css')->rel('stylesheet')->href($path);
+                : \HTML\link()->type('text/css')->rel('stylesheet')->href($path);
               }, self::merge($this->cssPaths)))));
       
       $prev = implode('', array_map(function($prev) { return $prev->text(); }, $prev));
@@ -123,14 +123,16 @@ namespace HTML {
             array_map(function($path) use ($prev) {
               return !is_string($path)
                 ? is_array($path)
-                  ? \HTML\Script($prev . "\n" . implode("\n", array_map(function($src, $file) {
+                  ? \HTML\script($prev . "\n" . implode("\n", array_map(function($src, $file) {
                       return preg_replace("/^" . pack('H*','EFBBBF') . "/", '', fileRead($file));
                     }, array_keys($path), array_values($path))))->type('text/javascript')
                   : null
-                : \HTML\Script()->type('text/javascript')->language('javascript')->src($path);
+                : \HTML\script()->type('text/javascript')->language('javascript')->src($path);
             }, self::merge($this->jsPaths)))));
 
-      $css && array_push($strs, $css, $js);
+      $css && array_push($strs, $css);
+      $js && array_push($strs, $js);
+
       return implode("", $strs);
     }
 
