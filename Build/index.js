@@ -110,7 +110,8 @@ module.exports = {
       .enqueue(Serve.Compile)
       .enqueue((_, ServeConfig) => closure(ServeConfig, Config))
   },
-  Export (closure, { dir: { html: htmlDir } }, Config) {
+  Export (closure, { dir: { html: htmlDir } = {} }, Config) {
+    if (htmlDir === undefined) htmlDir = Config.entry
 
     println("\n" + ' 【編譯並輸出目錄】'.yellow)
 

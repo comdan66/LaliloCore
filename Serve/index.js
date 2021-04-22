@@ -65,13 +65,13 @@ module.exports = {
 
         // dir
         const r = FileSystem.constants.R_OK, rw = r | FileSystem.constants.W_OK, configD4 = { icon: { dir: 'icon', permission: r }, scss: { dir: 'scss', permission: rw }, css: { dir: 'css', permission: rw }, img: { dir: 'img', permission: r }, js: { dir: 'js', permission: r }, html: { dir: '',  permission: r } }
-        Config.dir === undefined && (Config.dir = {})
-        for (let key in configD4) {
-          Config.dir[key] = Config.entry + dirOrEmpty(Typeof.str.do.or(Config.dir[key], dir => dir, configD4[key].dir))
-          exists(Config.dir[key]) || mkdir(Config.dir[key])
-          access(Config.dir[key], configD4[key].permission) || fail(null, '沒有 ' + Path.relative(Setting.root, Config.dir[key]) + Path.sep + ' ' + (configD4[key].permission == rw ? '讀寫' : '讀取') + '權限')
-          isDirectory(Config.dir[key]) || fail(null, '路徑 ' + Path.relative(Setting.root, Config.dir[key]) + Path.sep + ' 不是一個目錄')
-        }
+        if (Config.dir !== undefined)
+          for (let key in configD4) {
+            Config.dir[key] = Config.entry + dirOrEmpty(Typeof.str.do.or(Config.dir[key], dir => dir, configD4[key].dir))
+            exists(Config.dir[key]) || mkdir(Config.dir[key])
+            access(Config.dir[key], configD4[key].permission) || fail(null, '沒有 ' + Path.relative(Setting.root, Config.dir[key]) + Path.sep + ' ' + (configD4[key].permission == rw ? '讀寫' : '讀取') + '權限')
+            isDirectory(Config.dir[key]) || fail(null, '路徑 ' + Path.relative(Setting.root, Config.dir[key]) + Path.sep + ' 不是一個目錄')
+          }
 
         // watch
         Config.watch = Typeof.object.or(Config.watch, {})
@@ -117,6 +117,9 @@ module.exports = {
     const Factory = require('./Factory')
     Factory.config = Config
     Factory.root = Setting.root
+    
+    if (Config.dir === undefined)
+      return closure(Config, Factory)
 
     Queue()
       .enqueue(next => title('清空 CSS 目錄', cmdColor('執行指令', 'rm -rf ' + Path.relative(Setting.root, Config.dir.css) + Path.sep + '*'))
@@ -142,7 +145,6 @@ module.exports = {
         .catch(errors => fail(null, ...errors)), 500))
       
       .enqueue(next => closure(Config, Factory))
-
   },
   Watch (closure, Config, Factory) {
     title('監控 FILE 檔案', cmdColor('執行動作', 'watch files'))
