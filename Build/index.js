@@ -56,7 +56,6 @@ module.exports = {
         access(Config.dest) || fail(null, Path.relative(Setting.root, Config.dest) + Path.sep + ' 沒有讀取權限')
         isDirectory(Config.dest) || fail(null, Path.relative(Setting.root, Config.dest) + Path.sep + ' 不是目錄類型')
 
-        
         // php
         Config.php = Typeof.object.or(Config.php, {})
         Config.php.enable = Typeof.bool.or(Config.php.enable, false)
@@ -77,6 +76,8 @@ module.exports = {
 
         // exts
         Config.exts = Typeof.arr.do.or(Config.exts, exts => exts.map(ext => ext.toLowerCase()), [])
+
+        Config.includeFiles = Typeof.arr.or(Config.includeFiles, []).map(dir => Config.entry + dir)
 
         Config.ignoreDirs = Typeof.arr.or(Config.ignoreDirs, []).map(dir => Config.entry + dirOrEmpty(dir)).filter(dir => access(dir) && exists(dir))
 
@@ -121,7 +122,7 @@ module.exports = {
         && next(scanDir(Config.entry)
           .map(src => ({ src, ext: Path.extname(src).toLowerCase() }))
           .filter(({ src }) => !Config.ignoreDirs.filter(ignoreDir => isSub(ignoreDir, src)).length)
-          .filter(({ ext }) => Config.exts.includes(ext))
+          .filter(({ src, ext }) => Config.includeFiles.includes(src) || Config.exts.includes(ext))
           .filter(({ ext }) => ext != '.php' || Config.php.enable)
           .filter(file => !['.html', '.php'].includes(file.ext) || isSub(htmlDir, file.src))
           .map(file => ({
